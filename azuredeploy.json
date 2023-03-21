@@ -1,0 +1,653 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "topics_customertopic_name": {
+      "defaultValue": "bbgcustomertopic",
+      "type": "String"
+    },
+    "storageAccounts_storageaccfun_name": {
+      "defaultValue": "bbgcuststorageaccfun",
+      "type": "String"
+    },
+    "serverfarms_funappplan_name": {
+      "defaultValue": "bbgcustfunappplan",
+      "type": "String"
+    },
+    "virtualNetworks_vnet_name": {
+      "defaultValue": "bbgcust-vnet",
+      "type": "String"
+    },
+    "storageAccounts_storageacc_name": {
+      "defaultValue": "bbgcuststorageacc",
+      "type": "String"
+    },
+    "sites_funapp_test_name": {
+      "defaultValue": "bbgcust-functionapp",
+      "type": "String"
+    }
+  },
+  "variables": {},
+  "functions": [],
+  "resources": [
+    {
+      "type": "Microsoft.EventGrid/topics",
+      "apiVersion": "2022-06-15",
+      "name": "[parameters('topics_customertopic_name')]",
+      "location": "eastus",
+      "properties": {
+        "inputSchema": "EventGridSchema",
+        "publicNetworkAccess": "Enabled",
+        "dataResidencyBoundary": "WithinGeopair"
+      }
+    },
+    {
+      "type": "microsoft.insights/components",
+      "apiVersion": "2020-02-02",
+      "name": "[parameters('sites_funapp_test_name')]",
+      "location": "eastus",
+      "kind": "web",
+      "properties": {
+        "Application_Type": "web",
+        "Request_Source": "rest",
+        "RetentionInDays": 90,
+        "IngestionMode": "ApplicationInsights",
+        "publicNetworkAccessForIngestion": "Enabled",
+        "publicNetworkAccessForQuery": "Enabled"
+      }
+    },
+    {
+      "type": "Microsoft.Storage/storageAccounts",
+      "apiVersion": "2022-09-01",
+      "name": "[parameters('storageAccounts_storageaccfun_name')]",
+      "location": "eastus",
+      "sku": {
+        "name": "Standard_LRS",
+        "tier": "Standard"
+      },
+      "kind": "StorageV2",
+      "properties": {
+        "minimumTlsVersion": "TLS1_0",
+        "allowBlobPublicAccess": true,
+        "networkAcls": {
+          "bypass": "AzureServices",
+          "virtualNetworkRules": [
+            {
+              "id": "[concat(resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworks_vnet_name')),'/subnets/function')]",
+              "action": "Allow",
+              "state": "Succeeded"
+            }
+          ],
+          "ipRules": [],
+          "defaultAction": "Deny"
+        },
+        "supportsHttpsTrafficOnly": true,
+        "encryption": {
+          "services": {
+            "file": {
+              "keyType": "Account",
+              "enabled": true
+            },
+            "blob": {
+              "keyType": "Account",
+              "enabled": true
+            }
+          },
+          "keySource": "Microsoft.Storage"
+        },
+        "accessTier": "Hot"
+      }
+    },
+    {
+      "type": "Microsoft.Storage/storageAccounts/blobServices",
+      "apiVersion": "2022-05-01",
+      "name": "[concat(parameters('storageAccounts_storageacc_name'), '/default')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccounts_storageacc_name'))]"
+      ],
+      "sku": {
+        "name": "Standard_LRS",
+        "tier": "Standard"
+      },
+      "properties": {
+        "cors": {
+          "corsRules": []
+        },
+        "deleteRetentionPolicy": {
+          "allowPermanentDelete": false,
+          "enabled": false
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Storage/storageAccounts/blobServices",
+      "apiVersion": "2022-05-01",
+      "name": "[concat(parameters('storageAccounts_storageaccfun_name'), '/default')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccounts_storageaccfun_name'))]"
+      ],
+      "sku": {
+        "name": "Standard_LRS",
+        "tier": "Standard"
+      },
+      "properties": {
+        "cors": {
+          "corsRules": []
+        },
+        "deleteRetentionPolicy": {
+          "allowPermanentDelete": false,
+          "enabled": false
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Storage/storageAccounts/queueServices",
+      "apiVersion": "2022-05-01",
+      "name": "[concat(parameters('storageAccounts_storageacc_name'), '/default')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccounts_storageacc_name'))]"
+      ],
+      "properties": {
+        "cors": {
+          "corsRules": []
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Storage/storageAccounts/queueServices",
+      "apiVersion": "2022-05-01",
+      "name": "[concat(parameters('storageAccounts_storageaccfun_name'), '/default')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccounts_storageaccfun_name'))]"
+      ],
+      "properties": {
+        "cors": {
+          "corsRules": []
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Storage/storageAccounts/tableServices",
+      "apiVersion": "2022-05-01",
+      "name": "[concat(parameters('storageAccounts_storageacc_name'), '/default')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccounts_storageacc_name'))]"
+      ],
+      "properties": {
+        "cors": {
+          "corsRules": []
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Storage/storageAccounts/tableServices",
+      "apiVersion": "2022-05-01",
+      "name": "[concat(parameters('storageAccounts_storageaccfun_name'), '/default')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccounts_storageaccfun_name'))]"
+      ],
+      "properties": {
+        "cors": {
+          "corsRules": []
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
+      "apiVersion": "2021-09-01",
+      "name": "[concat(parameters('storageAccounts_storageaccfun_name'), '/default/azure-webjobs-hosts')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Storage/storageAccounts/blobServices', parameters('storageAccounts_storageaccfun_name'), 'default')]",
+        "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccounts_storageaccfun_name'))]"
+      ],
+      "properties": {
+        "immutableStorageWithVersioning": {
+          "enabled": false
+        },
+        "defaultEncryptionScope": "$account-encryption-key",
+        "denyEncryptionScopeOverride": false,
+        "publicAccess": "None"
+      }
+    },
+    {
+      "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
+      "apiVersion": "2021-09-01",
+      "name": "[concat(parameters('storageAccounts_storageaccfun_name'), '/default/azure-webjobs-secrets')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Storage/storageAccounts/blobServices', parameters('storageAccounts_storageaccfun_name'), 'default')]",
+        "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccounts_storageaccfun_name'))]"
+      ],
+      "properties": {
+        "immutableStorageWithVersioning": {
+          "enabled": false
+        },
+        "defaultEncryptionScope": "$account-encryption-key",
+        "denyEncryptionScopeOverride": false,
+        "publicAccess": "None"
+      }
+    },
+    {
+      "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
+      "apiVersion": "2022-09-01",
+      "name": "[concat(parameters('storageAccounts_storageacc_name'), '/default/customer-snapshots')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Storage/storageAccounts/blobServices', parameters('storageAccounts_storageacc_name'), 'default')]",
+        "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccounts_storageacc_name'))]"
+      ],
+      "properties": {
+        "immutableStorageWithVersioning": {
+          "enabled": false
+        },
+        "defaultEncryptionScope": "$account-encryption-key",
+        "denyEncryptionScopeOverride": false,
+        "publicAccess": "None"
+      }
+    },
+    {
+      "type": "Microsoft.Web/serverfarms",
+      "apiVersion": "2022-03-01",
+      "name": "[parameters('serverfarms_funappplan_name')]",
+      "location": "East US",
+      "sku": {
+        "name": "S1",
+        "tier": "Standard",
+        "size": "S1",
+        "family": "S",
+        "capacity": 1
+      },
+      "kind": "app",
+      "properties": {
+        "perSiteScaling": false,
+        "elasticScaleEnabled": false,
+        "maximumElasticWorkerCount": 1,
+        "isSpot": false,
+        "reserved": false,
+        "isXenon": false,
+        "hyperV": false,
+        "targetWorkerCount": 0,
+        "targetWorkerSizeId": 0,
+        "zoneRedundant": false
+      }
+    },
+    {
+      "type": "Microsoft.Network/virtualNetworks",
+      "apiVersion": "2020-11-01",
+      "name": "[parameters('virtualNetworks_vnet_name')]",
+      "location": "eastus",
+      "properties": {
+        "addressSpace": {
+          "addressPrefixes": [
+            "10.0.0.0/16"
+          ]
+        },
+        "dhcpOptions": {
+          "dnsServers": []
+        },
+        "subnets": [
+          {
+            "name": "function",
+            "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworks_vnet_name'), 'function')]",
+            "properties": {
+              "addressPrefix": "10.0.1.0/24",
+              "serviceEndpoints": [
+                {
+                  "service": "Microsoft.Storage",
+                  "locations": [
+                    "eastus",
+                    "westus",
+                    "westus3"
+                  ]
+                }
+              ],
+              "delegations": [
+                {
+                  "name": "delegation",
+                  "id": "[concat(resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworks_vnet_name'), 'function'), '/delegations/delegation')]",
+                  "properties": {
+                    "serviceName": "Microsoft.Web/serverfarms"
+                  },
+                  "type": "Microsoft.Network/virtualNetworks/subnets/delegations"
+                }
+              ],
+              "privateEndpointNetworkPolicies": "Enabled",
+              "privateLinkServiceNetworkPolicies": "Enabled"
+            },
+            "type": "Microsoft.Network/virtualNetworks/subnets"
+          }
+        ],
+        "virtualNetworkPeerings": [],
+        "enableDdosProtection": false
+      }
+    },
+    {
+      "type": "Microsoft.Network/virtualNetworks/subnets",
+      "apiVersion": "2020-11-01",
+      "name": "[concat(parameters('virtualNetworks_vnet_name'), '/function')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworks_vnet_name'))]"
+      ],
+      "properties": {
+        "addressPrefix": "10.0.1.0/24",
+        "serviceEndpoints": [
+          {
+            "service": "Microsoft.Storage",
+            "locations": [
+              "eastus",
+              "westus",
+              "westus3"
+            ]
+          }
+        ],
+        "delegations": [
+          {
+            "name": "delegation",
+            "id": "[concat(resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworks_vnet_name'), 'function'), '/delegations/delegation')]",
+            "properties": {
+              "serviceName": "Microsoft.Web/serverfarms"
+            },
+            "type": "Microsoft.Network/virtualNetworks/subnets/delegations"
+          }
+        ],
+        "privateEndpointNetworkPolicies": "Enabled",
+        "privateLinkServiceNetworkPolicies": "Enabled"
+      }
+    },
+    {
+      "type": "Microsoft.Storage/storageAccounts",
+      "apiVersion": "2022-09-01",
+      "name": "[parameters('storageAccounts_storageacc_name')]",
+      "location": "eastus",
+      "sku": {
+        "name": "Standard_LRS",
+        "tier": "Standard"
+      },
+      "kind": "StorageV2",
+      "properties": {
+        "publicNetworkAccess": "Enabled",
+        "minimumTlsVersion": "TLS1_0",
+        "allowBlobPublicAccess": true,
+        "networkAcls": {
+          "resourceAccessRules": [],
+          "bypass": "AzureServices",
+          "virtualNetworkRules": [
+            {
+              "id": "[concat(resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworks_vnet_name')),'/subnets/function')]",
+              "action": "Allow",
+              "state": "Succeeded"
+            }
+          ],
+          "ipRules": [],
+          "defaultAction": "Deny"
+        },
+        "supportsHttpsTrafficOnly": true,
+        "encryption": {
+          "services": {
+            "file": {
+              "keyType": "Account",
+              "enabled": true
+            },
+            "blob": {
+              "keyType": "Account",
+              "enabled": true
+            }
+          },
+          "keySource": "Microsoft.Storage"
+        },
+        "accessTier": "Hot"
+      }
+    },
+    {
+      "type": "Microsoft.Web/sites",
+      "apiVersion": "2022-03-01",
+      "name": "[parameters('sites_funapp_test_name')]",
+      "location": "East US",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/serverfarms', parameters('serverfarms_funappplan_name'))]",
+        "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworks_vnet_name'), 'function')]"
+      ],
+      "kind": "functionapp",
+      "properties": {
+        "enabled": true,
+        "httpsOnly": true,
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', parameters('serverfarms_funappplan_name'))]",
+        "reserved": false,
+        "isXenon": false,
+        "hyperV": false,
+        "vnetRouteAllEnabled": true,
+        "vnetImagePullEnabled": false,
+        "vnetContentShareEnabled": false,
+        "siteConfig": {
+          "numberOfWorkers": 1,
+          "acrUseManagedIdentityCreds": false,
+          "alwaysOn": false,
+          "http20Enabled": false,
+          "functionAppScaleLimit": 0,
+          "minimumElasticInstanceCount": 1
+        },
+        "scmSiteAlsoStopped": false,
+        "clientAffinityEnabled": false,
+        "clientCertEnabled": false,
+        "clientCertMode": "Required",
+        "hostNamesDisabled": false,
+        "customDomainVerificationId": "CB9AE6DE69F11E4F071C749E6629C3467EE244610F8B742A9F5BADB47946C953",
+        "containerSize": 1536,
+        "dailyMemoryTimeQuota": 0,
+        "redundancyMode": "None",
+        "storageAccountRequired": false,
+        "virtualNetworkSubnetId": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworks_vnet_name'), 'function')]",
+        "keyVaultReferenceIdentity": "SystemAssigned"
+      },
+      "resources": [
+        {
+          "name": "appsettings",
+          "type": "config",
+          "apiVersion": "2015-08-01",
+          "dependsOn": [
+            "[resourceId('Microsoft.Web/sites', parameters('sites_funapp_test_name'))]"
+          ],
+          "tags": {
+            "displayName": "fun-appsettings"
+          },
+          "properties": {
+            "AzureWebJobsStorage": "[concat('DefaultEndpointsProtocol=https;AccountName=', parameters('storageAccounts_storageaccfun_name'), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccounts_storageaccfun_name')),'2017-06-01').keys[0].value,';EndpointSuffix=core.windows.net')]",
+            "AzureWebJobsDashboard": "[concat('DefaultEndpointsProtocol=https;AccountName=', parameters('storageAccounts_storageaccfun_name'), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccounts_storageaccfun_name')),'2017-06-01').keys[0].value,';EndpointSuffix=core.windows.net')]",
+            "FUNCTIONS_EXTENSION_VERSION": "~4",
+            "FUNCTIONS_WORKER_RUNTIME": "dotnet",
+            "DestinationConnectionString": "[concat('DefaultEndpointsProtocol=https;AccountName=', parameters('storageAccounts_storageacc_name'), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccounts_storageacc_name')),'2017-06-01').keys[0].value,';EndpointSuffix=core.windows.net')]",
+            "DestinationContainerName": "customer-snapshots"
+          }
+        }
+      ]
+    },
+    {
+      "name": "[concat(parameters('sites_funapp_test_name'), '/ZipDeploy')]",
+      "type": "Microsoft.Web/sites/extensions",
+      "apiVersion": "2022-03-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/sites', parameters('sites_funapp_test_name'))]"
+      ],
+      "properties": {
+        "packageUri": "https://github.com/emtecinc/Bloomberg-Data-Consumer/blob/main/zipdeploy_content.zip?raw=true"
+      }
+    },
+    {
+      "type": "Microsoft.Web/sites/virtualNetworkConnections",
+      "apiVersion": "2022-03-01",
+      "name": "[concat(parameters('sites_funapp_test_name'), '/ff81c421-c82a-4e1d-b0f5-459a5ee0486a_function')]",
+      "location": "East US",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/sites', parameters('sites_funapp_test_name'))]"
+      ],
+      "properties": {
+        "vnetResourceId": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworks_vnet_name'), 'function')]",
+        "isSwift": true
+      }
+    },
+    {
+      "type": "Microsoft.Web/sites/basicPublishingCredentialsPolicies",
+      "apiVersion": "2022-03-01",
+      "name": "[concat(parameters('sites_funapp_test_name'), '/ftp')]",
+      "location": "East US",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/sites', parameters('sites_funapp_test_name'))]"
+      ],
+      "properties": {
+        "allow": true
+      }
+    },
+    {
+      "type": "Microsoft.Web/sites/basicPublishingCredentialsPolicies",
+      "apiVersion": "2022-03-01",
+      "name": "[concat(parameters('sites_funapp_test_name'), '/scm')]",
+      "location": "East US",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/sites', parameters('sites_funapp_test_name'))]"
+      ],
+      "properties": {
+        "allow": true
+      }
+    },
+    {
+      "type": "Microsoft.Web/sites/config",
+      "apiVersion": "2022-03-01",
+      "name": "[concat(parameters('sites_funapp_test_name'), '/web')]",
+      "location": "East US",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/sites', parameters('sites_funapp_test_name'))]"
+      ],
+      "properties": {
+        "numberOfWorkers": 1,
+        "defaultDocuments": [
+          "Default.htm",
+          "Default.html",
+          "Default.asp",
+          "index.htm",
+          "index.html",
+          "iisstart.htm",
+          "default.aspx",
+          "index.php"
+        ],
+        "netFrameworkVersion": "v6.0",
+        "requestTracingEnabled": false,
+        "remoteDebuggingEnabled": false,
+        "remoteDebuggingVersion": "VS2019",
+        "httpLoggingEnabled": false,
+        "acrUseManagedIdentityCreds": false,
+        "logsDirectorySizeLimit": 35,
+        "detailedErrorLoggingEnabled": false,
+        "publishingUsername": "$bloomfunapp-test",
+        "scmType": "None",
+        "use32BitWorkerProcess": true,
+        "webSocketsEnabled": false,
+        "alwaysOn": false,
+        "managedPipelineMode": "Integrated",
+        "virtualApplications": [
+          {
+            "virtualPath": "/",
+            "physicalPath": "site\\wwwroot",
+            "preloadEnabled": false
+          }
+        ],
+        "loadBalancing": "LeastRequests",
+        "experiments": {
+          "rampUpRules": []
+        },
+        "autoHealEnabled": false,
+        "vnetName": "ff81c421-c82a-4e1d-b0f5-459a5ee0486a_function",
+        "vnetRouteAllEnabled": true,
+        "vnetPrivatePortsCount": 0,
+        "localMySqlEnabled": false,
+        "ipSecurityRestrictions": [
+          {
+            "ipAddress": "Any",
+            "action": "Allow",
+            "priority": 2147483647,
+            "name": "Allow all",
+            "description": "Allow all access"
+          }
+        ],
+        "scmIpSecurityRestrictions": [
+          {
+            "ipAddress": "Any",
+            "action": "Allow",
+            "priority": 2147483647,
+            "name": "Allow all",
+            "description": "Allow all access"
+          }
+        ],
+        "scmIpSecurityRestrictionsUseMain": false,
+        "http20Enabled": false,
+        "minTlsVersion": "1.2",
+        "scmMinTlsVersion": "1.2",
+        "ftpsState": "AllAllowed",
+        "preWarmedInstanceCount": 1,
+        "functionAppScaleLimit": 0,
+        "functionsRuntimeScaleMonitoringEnabled": false,
+        "minimumElasticInstanceCount": 1,
+        "azureStorageAccounts": {}
+      }
+    },
+    {
+      "type": "Microsoft.Web/sites/functions",
+      "apiVersion": "2022-03-01",
+      "name": "[concat(parameters('sites_funapp_test_name'), '/CopyBlobFile')]",
+      "location": "East US",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/sites', parameters('sites_funapp_test_name'))]"
+      ],
+      "properties": {
+        "script_root_path_href": "[concat('https://',parameters('sites_funapp_test_name'), '.azurewebsites.net/admin/vfs/site/wwwroot/CopyBlobFile/')]",
+        "script_href": "[concat('https://',parameters('sites_funapp_test_name'), '.azurewebsites.net/admin/vfs/site/wwwroot/bin/Bloomberg.DataLicense.Customer.Subscriber.dll')]",
+        "config_href": "[concat('https://',parameters('sites_funapp_test_name'), '.azurewebsites.net/admin/vfs/site/wwwroot/CopyBlobFile/function.json')]",
+        "test_data_href": "[concat('https://',parameters('sites_funapp_test_name'), '.azurewebsites.net/admin/vfs/data/Functions/sampledata/CopyBlobFile.dat')]",
+        "href": "[concat('https://',parameters('sites_funapp_test_name'), '.azurewebsites.net/admin/functions/CopyBlobFile')]",
+        "config": {},
+        "language": "DotNetAssembly",
+        "isDisabled": false
+      }
+    },
+    {
+      "type": "Microsoft.Web/sites/hostNameBindings",
+      "apiVersion": "2022-03-01",
+      "name": "[concat(parameters('sites_funapp_test_name'), '/', parameters('sites_funapp_test_name'), '.azurewebsites.net')]",
+      "location": "East US",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/sites', parameters('sites_funapp_test_name'))]"
+      ],
+      "properties": {
+        "siteName": "[parameters('sites_funapp_test_name')]",
+        "hostNameType": "Verified"
+      }
+    },
+   {
+      "type": "Microsoft.EventGrid/topics/eventSubscriptions",
+      "apiVersion": "2022-06-15",
+      "name": "[concat(parameters('topics_customertopic_name'), '/customer-function-copyblob')]",
+      "dependsOn": [
+         "[resourceId('Microsoft.EventGrid/topics', parameters('topics_customertopic_name'))]",
+         "[resourceId('Microsoft.Web/sites/functions', parameters('sites_funapp_test_name'), 'CopyBlobFile')]",
+         "[resourceId('Microsoft.Web/sites/extensions', parameters('sites_funapp_test_name'),'ZipDeploy')]"
+      ],
+      "properties": {
+        "destination": {
+          "properties": {
+            "resourceId": "[resourceId('Microsoft.Web/sites/functions', parameters('sites_funapp_test_name'), 'CopyBlobFile')]",
+            "maxEventsPerBatch": 1,
+            "preferredBatchSizeInKilobytes": 64
+          },
+          "endpointType": "AzureFunction"
+        },
+        "filter": {
+          "enableAdvancedFilteringOnArrays": true
+        },
+        "labels": [],
+        "eventDeliverySchema": "EventGridSchema",
+        "retryPolicy": {
+          "maxDeliveryAttempts": 30,
+          "eventTimeToLiveInMinutes": 1440
+        }
+      }
+    }
+  ],
+  "outputs": {}
+}
