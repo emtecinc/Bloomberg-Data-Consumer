@@ -20,7 +20,7 @@ This sample deploys an Azure Functions app with an Event Grid trigger to act as 
 ## Resources
 All default_name of resources **can be modified** and also must be **unique**. 
 
-| resources | default_name | Comment |
+| Resources | default_name | Comment |
 | :----- | :--- | :--- |
 | Event Grid topic | bbgcustomertopic |   |
 | Function App plan | bbgcustfunappplan |   |
