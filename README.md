@@ -4,9 +4,8 @@ The Bloomberg Data Consumer project is a one click Microsoft Azure solution whic
 There are two ways of deployment:
 ### 1. Using ARM template
 
-[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Femtecinc%2Fbloomberg-data-consumer%2Fmain%2Fazuredeploy.json) 
 **Click me** (use CTRL+Click for new tab)
-
+[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Femtecinc%2Fbloomberg-data-consumer%2Fmain%2Fazuredeploy.json) 
 
 ### 2. Using Powershell script
 
