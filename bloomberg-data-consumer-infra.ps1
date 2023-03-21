@@ -194,4 +194,17 @@ New-AzEventGridSubscription -TopicName $eventgridtopic `
 -Endpoint $endpoint `
 -ResourceGroupName $resourceGroupName
 
-#-----------------------------------
+#------------------------------------------------------------------------------------------------
+# Get endpoint and key1 for event grid topic 
+
+$endpoint = (Get-AzEventGridTopic -ResourceGroupName $resourceGroupName -Name $eventgridtopic).Endpoint
+$urlContentInBytes = [System.Text.Encoding]::UTF8.GetBytes($endpoint)
+$endpointInbase64 = [System.Convert]::ToBase64String($urlContentInBytes) 
+
+$key = (Get-AzEventGridTopicKey -ResourceGroupName $resourceGroupName -Name $eventgridtopic).Key1
+$keyInBytes = [System.Text.Encoding]::UTF8.GetBytes($key)
+$keyInbase64 = [System.Convert]::ToBase64String($fileContentInBytes) 
+
+"Topic endpoint = $endpointInbase64"
+"Access Key = $keyInbase64"
+#------------------------------------------------------------------------------------------------
