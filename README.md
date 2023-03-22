@@ -28,3 +28,19 @@ All default_name of resources **can be modified** and also must be **unique**.
 | Azure Functions app (function) | bbgcust-functionapp (CopyBlobFile) | function name i.e CopyBlobFile is fix  |
 | Azure Storage account  | bbgcuststorageaccfun | dedicatedly used for function related data |
 | Azure Storage account | bbgcuststorageacc   | used as destination container to store blob files |
+
+
+## Get the Topic Endpoint & Access key
+Once the deployment is done, Event Grid topic endpoint and Access key should be provided to Bloomberg.
+
+If deployment is done using PowerShell script then Event Grid topic endpoint and Access key will be available in envrypted format at the end of the script execution.
+
+If deployment is done using ARM template then -
+
+#### Go to Event Grid topic (customertopic) -> Overview -> Topic Endpoint
+
+<img width="881" alt="image" src="https://user-images.githubusercontent.com/126143091/226527597-60933b38-6102-4498-a05b-1dd0139b7ed3.png">
+
+#### Go to Event Grid topic (customertopic) -> Settings -> Access Key -> Key1/Key2
+
+<img width="940" alt="image" src="https://user-images.githubusercontent.com/126143091/226530031-2c18b375-b297-466f-b1db-2794f398509b.png">
