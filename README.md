@@ -33,7 +33,7 @@ All default_name of resources **can be modified** and also must be **unique**.
 ## Get the Topic Endpoint & Access key
 Once the deployment is done, Event Grid topic endpoint and Access key should be provided to Bloomberg.
 
-If deployment is done using PowerShell script then Event Grid topic endpoint and Access key will be available in envrypted format at the end of the script execution.
+If deployment is done using PowerShell script then Event Grid topic endpoint and Access key will be available in encrypted format at the end of the script execution.
 
 If deployment is done using ARM template then -
 
