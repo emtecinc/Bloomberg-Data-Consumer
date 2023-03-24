@@ -109,7 +109,7 @@ New-AzFunctionAppPlan -ResourceGroupName "$resourceGroupName" `
 New-AzFunctionApp -Name $azfunctionapp `
                   -ResourceGroupName $resourceGroupName `
                   -PlanName "$funappplan" `
-                  -StorageAccountName "storageaccbloombgfun" `
+                  -StorageAccountName "$storageaccfun" `
                   -Runtime DotNet `
                   -RuntimeVersion 6 `
                   -OSType Windows `
